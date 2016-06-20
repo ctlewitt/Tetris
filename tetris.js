@@ -2,6 +2,15 @@
 file:/Users/clewittes/Documents/Recurse Center/Projects/tetris_game/index.html
 
 Things to do:
+
+switch key bindings to space drop and down down and p pause
+use pages.github.com to make it into a website
+make pieces a little spread out on the blue spectrum to differentiate between them
+display next piece ahead of time
+make upcoming piece appear sooner
+
+
+
 2 player (add to opponent's rows when you score)
 multiple boards for multiple players (need to make board an object (currently only shapes are objects))
 play against your friends
