@@ -1,150 +1,12 @@
-
 /*
-file:///Users/clewittes/Documents/Recurse%20Center/JS%20Workshops/p5_scaffold/index.html
+file:/Users/clewittes/Documents/Recurse Center/Projects/tetris_game/index.html
+
 Things to do:
-x make board
-x make empty array of board (fill in some values, so you can see how they are displayed)
-x finish filling in colors assoc. array for all the shapes
-x make objects and rules for how they move through board
-x  falling
-x  rotating
-x  stopping when they hit something
-x draw objects as they fall
-x when they hit the bottom, make them part of the array
-x generate a random object
-
-x clear rows when you hit the bottom
-
-x bugs: multiple rows are not being deleted at the bottom
-x bug: dropping piece is not dropped all the way (after rows have been removed)
-
-x PAUSE
-
-x increase speed with score
-x display score
-
 2 player (add to opponent's rows when you score)
-
-multiple boards for multiple players (need to make functional)
+multiple boards for multiple players (need to make board an object (currently only shapes are objects))
 play against your friends
 make 3D (with multiple people)
-
-
-x OBVIOUSLY: I need a "make everything blue feature"
 */
-
-
-
-
-class Color {
-	constructor(red, green, blue){
-		this.red = red;
-		this.green = green;
-		this.blue = blue;
-	}
-}
-
-
-var timer = 0;
-var paused = false;
-var yRect = window.innerHeight / 2 - 15;
-var allBlue = false;
-var redColor = 0;
-var greenColor = 0;
-var blueColor = 0;
-var squareEdge = 25;
-var boardWidth = 10;
-var boardInvisibleHeight = 2;
-var boardVisibleHeight = 20;
-var boardHeight = boardVisibleHeight + boardInvisibleHeight;
-var boardXPos = window.innerWidth / 2 - (squareEdge * boardWidth) / 2;
-var boardYPos = squareEdge;
-var colors = {};
-//generate empty board
-//board is column major, since I will be checking the contents of each column as pieces fall
-var boardArray = new Array(boardWidth);
-for (var i = 0; i < boardWidth; i++) {
-	boardArray[i] = new Array(boardHeight);
-}
-var shapeStartXPos = boardWidth / 2;
-var shapeStartYPos = 0; //was 0
-var currentShape = null;
-var points = 0;
-
-//possible shapes to generate
-var possibleShapes = {
-	"Square": {
-		"color": "Y",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos - 1],
-			[shapeStartXPos, shapeStartYPos - 1],
-		]
-	},
-	"Zigzag": {
-		"color": "R",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos, shapeStartYPos - 1],
-			[shapeStartXPos + 1, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos - 1],
-		]
-	},
-	"ZigzagB": {
-		"color": "G",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos, shapeStartYPos - 1],
-			[shapeStartXPos - 1, shapeStartYPos],
-			[shapeStartXPos + 1, shapeStartYPos - 1],
-		]
-	},
-	"LShape": {
-		"color": "O",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos + 1, shapeStartYPos],
-			[shapeStartXPos + 1, shapeStartYPos - 1],
-			[shapeStartXPos - 1, shapeStartYPos],
-		]
-	},
-	"LShapeB": {
-		"color": "B",		
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos - 1],
-			[shapeStartXPos + 1, shapeStartYPos],
-		]
-	},
-	"Stick": {
-		"color": "lB",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos + 1, shapeStartYPos],
-			[shapeStartXPos + 2, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos],
-		]
-	},
-	"Tee": {
-		"color": "P",
-		"startPositions": [
-			[shapeStartXPos, shapeStartYPos],
-			[shapeStartXPos + 1, shapeStartYPos],
-			[shapeStartXPos - 1, shapeStartYPos],
-			[shapeStartXPos, shapeStartYPos - 1],
-		]
-	}
-};
-
-
-//state variables
-var READY = 0;
-var FALLING = 1;
-var HIT = 2;
-var GAME_OVER = 3;
-var state = READY;
 
 function setup() {
 	createCanvas(
@@ -169,10 +31,45 @@ function setup() {
 	button.mousePressed(blueifyEverything);
 }
 
-// you always need a draw function in p5.js
-// this is the function that gets called continuously in the background
-// you can think of this function as what gets applied in each frame
 function draw() {
+	if (timer == 0) {
+		switch (state) {
+            case READY:
+				//reset game state variables
+				points = 0;
+				timer = 0;
+				paused = false;
+				allBlue = false;
+				//reset board (board is column major, since I will be checking the contents of each column as pieces fall)
+				boardArray = new Array(boardWidth);
+				for (var i = 0; i < boardWidth; i++) {
+					boardArray[i] = new Array(boardHeight);
+				}
+				//generate new random shape
+				currentShape = new TetrisShape(possibleShapes);
+				//set state to falling
+				state = FALLING;
+				break;
+			case FALLING:
+				currentShape.moveDown();
+				break;
+			case HIT:
+				currentShape.addToBoard();
+				points += processFullRows();
+				//check if game is over
+				if (boardOverflowed()) {
+					state = GAME_OVER;
+					//DISPLAY THAT GAME IS OVER
+				}
+				else{
+					currentShape = new TetrisShape(possibleShapes);
+					state = FALLING;
+				}
+				break;
+			//if the state is GAME_OVER do nothing
+        }
+	}
+
 	//background
 	background(redColor + 100, greenColor + 20, blueColor + 255);
 	//board background
@@ -180,6 +77,7 @@ function draw() {
 	rect(boardXPos, boardYPos + (boardInvisibleHeight * squareEdge), boardWidth * squareEdge, boardVisibleHeight * squareEdge); //board offset by invisible squares
 	textSize(22);
 	text("Score: " + points, boardXPos, boardYPos + (boardHeight + 1) *squareEdge);
+	text("Level: " + Math.floor(points / 4), boardXPos + (boardWidth/2)*squareEdge, boardYPos + (boardHeight + 1) *squareEdge);
 	
 	//draw the accumulated shapes in the board
 	boardArray.forEach(function(column, col_idx) {
@@ -199,60 +97,42 @@ function draw() {
 		currentShape.draw();
 	}
 	
-	if (! paused) {
-		//increment timer
+	if (! paused && state != GAME_OVER) {
+		//increment timer (speeds up as score increases)
         timer = (timer + 1) % (30 - Math.floor(points/4));
 	}
-	else{ //game is paused
+	else{ //game is paused or over
+		//cover board
 		stroke(200, 200, 255, 215);
 		fill(200, 200, 255, 215);
 		rect(boardXPos, boardYPos + boardInvisibleHeight*squareEdge, boardWidth*squareEdge, boardVisibleHeight*squareEdge);
+		//displaying "Game Over" or "Pause" message
+		var mainText = "";
+		var subText = "";
+		//setting text for game over scenario
+		if (state == GAME_OVER) {
+            mainMessage = "Game Over";
+			instructions = "Press \'p\' to play again.";
+        }
+		//setting text for paused scenario
+		else{ //paused
+			mainMessage = "Paused";
+			instructions = "Press \' \' to unpause.";
+		}
 		stroke(0,0,0);
 		fill(0, 0, 0);
 		textAlign("center");
 		textSize(30);
-		text("Paused", boardXPos + boardWidth*squareEdge/2, boardYPos + (boardInvisibleHeight + boardHeight)*squareEdge/2);
-		
+		text(mainMessage, boardXPos + boardWidth*squareEdge/2, boardYPos + (boardInvisibleHeight + boardHeight)*squareEdge/2);
+		textSize(15);
+		//instructions for starting over
+		text(instructions, boardXPos + boardWidth*squareEdge/2, boardYPos + (boardInvisibleHeight + boardHeight + 2)*squareEdge/2);		
 	}
 	
-	if (timer == 0) {
-		//CHANGE TO SWITCH STATEMENT
-		//console.log("State is: " + state);
-		if (state == READY) {
-			//generate new random shape
-			currentShape = new TetrisShape(possibleShapes);
-			//set state to falling
-			state = FALLING;
-		} else if (state == FALLING) {
-			currentShape.moveDown();
-		} else if (state == HIT) {
-			currentShape.addToBoard();
-			points += processFullRows();
-			//check if game is over
-			if (boardOverflowed()) {
-				state = GAME_OVER;
-				//DISPLAY THAT GAME IS OVER
-            }
-			else{
-				currentShape = new TetrisShape(possibleShapes);
-				state = FALLING;
-				//state = READY;
-				//console.log("keep playing!!!");
-			}
-//			currentShape = null;
-		} else if (state == GAME_OVER) {
-			//display game over; click to play again
-			//onclick (MAKE THIS FUNCTION) reset game variables and set state to ready again
-			//I COULD HAVE ALL OF MY VARIABLE SETTING DONE IN A PRE-READY STATE CALLED 'NEW_GAME' AND THEN SET STATE
-			//FROM HERE TO NEW_GAME
-		}
-    }
-
-
-	redColor = (redColor + .05) % 255;
-	greenColor = (greenColor + .05) % 255;
+	//background color is constantly changing
+	redColor = (redColor + .05) % 155;
+	greenColor = (greenColor + .05) % 155;
 	blueColor = (blueColor + .05) % 255;
-	//debugger;
 
 
 
@@ -357,19 +237,26 @@ function keyPressed() {
 
 //pause
 function keyTyped() {
-	//pause
-    if (key === ' ') {
-		if (! paused) {
-            paused = true;
-	    }
-		else{
-			paused = false;
-		}
-    }
-	//blueify
-	else if (key === 'b') {
-        blueifyEverything();
-    }
+	switch (key) {
+		//pause/unpause
+		case ' ':
+			if (! paused) {
+	            paused = true;
+		    }
+			else{
+				paused = false;
+			}
+			break;
+		//blueify
+		case 'b':
+			blueifyEverything();
+			break;
+		case 'p':
+			if (state == GAME_OVER) {
+				state = READY;
+			}
+	        break;
+	}
 }
 
 function blueifyEverything() {
