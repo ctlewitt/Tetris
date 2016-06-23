@@ -64,7 +64,6 @@ class TetrisShape {
 	}
 		
 	hitSomething(tempPointsInSpace){
-		//console.log("temp points in space: " + tempPointsInSpace);
 		var hitBottom = tempPointsInSpace.some(pos => pos[Yidx] >= boardHeight);
 		var hitSide = tempPointsInSpace.some(pos => pos[Xidx] >= boardWidth || pos[Xidx] < 0);
 		//return true if tempPointsInSpace has fallen out of board

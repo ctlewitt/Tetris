@@ -286,15 +286,18 @@ function blueifyEverything() {
 	//allBlue is used to determine how to draw the boardGrid and the tetris shapes
 	if (! allBlue) {
         allBlue = true;
+		button.html("colorify");
     }
 	else{
 		allBlue = false;
+		button.html("blueify");
 	}
 	//this.label = "undo";
 	//set background color
 	blueColor = 0;
 	redColor = 0;
 	greenColor = 0;
+
 }
 
 
