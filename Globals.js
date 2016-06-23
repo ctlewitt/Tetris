@@ -15,6 +15,7 @@ var state = READY;
 var redColor = 0;
 var greenColor = 0;
 var blueColor = 0;
+
 //board dimensions and positions
 var squareEdge = 25;
 var boardWidth = 10;
@@ -25,14 +26,24 @@ var boardXPos = window.innerWidth / 2 - (squareEdge * boardWidth) / 2;
 var boardYPos = squareEdge;
 //colors for pieces (and board)
 var colors = {};
-//generate empty board
+
+
 //board is column major, since I will be checking the contents of each column as pieces fall
 var boardArray = new Array(boardWidth);
 
 //shape position and pieces
 var shapeStartXPos = boardWidth / 2;
-var shapeStartYPos = 0; //was 0
+var shapeStartYPos = boardInvisibleHeight - 1; //was 0
+var nextShape = null;
 var currentShape = null;
+
+//preview box dimensions and positions
+var previewEdge = 5;
+var previewXPos = boardXPos + boardWidth*squareEdge + squareEdge*2;
+var previewYPos = boardYPos + + (boardInvisibleHeight * squareEdge); //was without part in parentheses
+var previewShapeXPos = ((previewEdge) / 2) ;//(previewEdge*squareEdge-1/2)/2;
+var previewShapeYPos = ((previewEdge) / 2);//(previewEdge*squareEdge-1/2)/2;
+
 
 //possible shapes to generate
 var possibleShapes = {
@@ -86,7 +97,7 @@ var possibleShapes = {
 		"startPositions": [
 			[shapeStartXPos, shapeStartYPos],
 			[shapeStartXPos + 1, shapeStartYPos],
-			[shapeStartXPos + 2, shapeStartYPos],
+			[shapeStartXPos - 2, shapeStartYPos],
 			[shapeStartXPos - 1, shapeStartYPos],
 		]
 	},

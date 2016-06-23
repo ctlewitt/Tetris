@@ -1,13 +1,11 @@
 /*
-file:/Users/clewittes/Documents/Recurse Center/Projects/tetris_game/index.html
+file:
+/Users/clewittes/Documents/Recurse Center/Projects/tetris_game/index.html
 
 Things to do:
-
-switch key bindings to space drop and down down and p pause
 use pages.github.com to make it into a website
 make pieces a little spread out on the blue spectrum to differentiate between them
-display next piece ahead of time
-make upcoming piece appear sooner
+make next piece displayed a little more centered (icing)
 
 
 
@@ -56,6 +54,7 @@ function draw() {
 				}
 				//generate new random shape
 				currentShape = new TetrisShape(possibleShapes);
+				nextShape = new TetrisShape(possibleShapes);
 				//set state to falling
 				state = FALLING;
 				break;
@@ -68,14 +67,14 @@ function draw() {
 				//check if game is over
 				if (boardOverflowed()) {
 					state = GAME_OVER;
-					//DISPLAY THAT GAME IS OVER
 				}
 				else{
-					currentShape = new TetrisShape(possibleShapes);
+					currentShape = nextShape;
+					nextShape = new TetrisShape(possibleShapes);
 					state = FALLING;
 				}
 				break;
-			//if the state is GAME_OVER do nothing
+			//case GAMEOVER: do nothing
         }
 	}
 
@@ -86,7 +85,7 @@ function draw() {
 	rect(boardXPos, boardYPos + (boardInvisibleHeight * squareEdge), boardWidth * squareEdge, boardVisibleHeight * squareEdge); //board offset by invisible squares
 	textSize(22);
 	text("Score: " + points, boardXPos, boardYPos + (boardHeight + 1) *squareEdge);
-	text("Level: " + Math.floor(points / 4), boardXPos + (boardWidth/2)*squareEdge, boardYPos + (boardHeight + 1) *squareEdge);
+	text("Level: " + Math.floor(points / 4), boardXPos + (boardWidth/2)*squareEdge, boardYPos + (boardHeight + 1) *squareEdge);	
 	
 	//draw the accumulated shapes in the board
 	boardArray.forEach(function(column, col_idx) {
@@ -102,9 +101,21 @@ function draw() {
 			}
 		}, this);
 	}, this);
+	//draw the current shape
 	if (currentShape != null && state != READY && state != GAME_OVER) {
 		currentShape.draw();
 	}
+	
+	//draw preview board background
+	fill(0, 0, 0); 
+	rect(previewXPos, previewYPos, previewEdge * squareEdge, previewEdge * squareEdge); 
+
+	//draw preview shape
+	if (nextShape != null && state != READY && state != GAME_OVER && !paused) {
+		fill(255,255,255);
+        nextShape.drawPreview();
+    }
+	
 	
 	if (! paused && state != GAME_OVER) {
 		//increment timer (speeds up as score increases)
@@ -121,12 +132,12 @@ function draw() {
 		//setting text for game over scenario
 		if (state == GAME_OVER) {
             mainMessage = "Game Over";
-			instructions = "Press \'p\' to play again.";
+			instructions = "Press \'s\' to play again.";
         }
 		//setting text for paused scenario
 		else{ //paused
 			mainMessage = "Paused";
-			instructions = "Press \' \' to unpause.";
+			instructions = "Press \'p\' to unpause.";
 		}
 		stroke(0,0,0);
 		fill(0, 0, 0);
@@ -238,7 +249,7 @@ function keyPressed() {
 				currentShape.rotate();
 				break;
 			case DOWN_ARROW:
-				currentShape.drop();
+				currentShape.moveDown();
 				break;
 		}
 	}
@@ -248,7 +259,7 @@ function keyPressed() {
 function keyTyped() {
 	switch (key) {
 		//pause/unpause
-		case ' ':
+		case 'p':
 			if (! paused) {
 	            paused = true;
 		    }
@@ -260,11 +271,14 @@ function keyTyped() {
 		case 'b':
 			blueifyEverything();
 			break;
-		case 'p':
+		case 's':
 			if (state == GAME_OVER) {
 				state = READY;
 			}
 	        break;
+		case ' ':
+			currentShape.drop();
+			break;
 	}
 }
 

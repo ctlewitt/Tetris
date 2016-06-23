@@ -18,14 +18,7 @@ class TetrisShape {
 	}
 
 	draw() {
-		if (!allBlue) {
-			fill(colors[this.color].red, colors[this.color].green, colors[this.color].blue);			
-        }
-		else{
-			fill(colors[this.color].red * .45, colors[this.color].green * .30, colors[this.color].blue + (255 - colors[this.color].blue ) * .9);					
-		}
-		//I LEFT OFF HERE!!!
-		//MAY NEED TO FIX THIS SO THAT IT ONLY DRAWS IF THERE IS A SHAPE TO DRAW
+		this.drawHelperSetColors();
 		this.pointsInSpace.forEach(function(point) {
 			if (point[Yidx] >= boardInvisibleHeight) {
 				//draw box
@@ -34,6 +27,27 @@ class TetrisShape {
 		}, this);
 	}
 
+	drawPreview() {
+		this.drawHelperSetColors();
+		var centerPoint = this.pointsInSpace[0];
+		console.log("drawing shape");
+		this.pointsInSpace.forEach(function(point) {
+			//draw box
+			//rect(previewXPos, previewYPos, squareEdge, squareEdge);
+			rect(previewXPos + (point[0] - centerPoint[0] + previewShapeXPos) * squareEdge, previewYPos + (point[1] - centerPoint[1] + previewShapeYPos) * squareEdge, squareEdge, squareEdge);
+			//console.log("")
+		}, this);		
+	}
+	
+	drawHelperSetColors(){
+		if (!allBlue) {
+			fill(colors[this.color].red, colors[this.color].green, colors[this.color].blue);			
+        }
+		else{
+			fill(colors[this.color].red * .45, colors[this.color].green * .30, colors[this.color].blue + (255 - colors[this.color].blue ) * .9);					
+		}		
+	}
+	
 	moveDown() {
 		//check if it can move down
 		var tempPointsInSpace = this.pointsInSpace.map(pos =>  [pos[Xidx], pos[Yidx]+1]);
@@ -93,23 +107,18 @@ a+...a
                 this.moveDown();
             }
         }
-		else{
-			//console.log("could not rotate; hit something/side/bottom")
-		}
+		//else, do nothing; hits something when rotating
 	}
 
 	moveLeft(){
-		//console.log("move left");
 		this.moveDir(-1);
 	}
 	
 	moveRight(){
-		//console.log("move right");
 		this.moveDir(1);
 	}
 	
 	//helper function to moveLeft and moveRight;
-	//WHEN THE TEMP POINTS IN SPACE IS JUST OUTSIDE OF THE BOARD WIDTH, THIS CAUSES PROBLEMS
 	moveDir(dir){
 		var tempPointsInSpace = this.pointsInSpace.map(pos => [pos[Xidx]+dir, pos[Yidx]]);
 		if (! this.hitSomething(tempPointsInSpace)) {
@@ -124,8 +133,6 @@ a+...a
 	drop(){
 		while (state != HIT) {
 			this.moveDown();
-	        }
+	    }
 	}
-	
-
 }
