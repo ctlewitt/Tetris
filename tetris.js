@@ -292,7 +292,6 @@ function blueifyEverything() {
 		allBlue = false;
 		button.html("blueify");
 	}
-	//this.label = "undo";
 	//set background color
 	blueColor = 0;
 	redColor = 0;
